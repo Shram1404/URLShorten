@@ -1,0 +1,45 @@
+﻿@model URLShorten.Models.URLShort
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<h4>URLShort</h4>
+
+<form asp-action="Index">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-group">
+        <label asp-for="FullURL" class="control-label"></label>
+        <input asp-for="FullURL" class="form-control" />
+        <span asp-validation-for="FullURL" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="CreatedBy" class="control-label"></label>
+        <input asp-for="CreatedBy" class="form-control" />
+        <span asp-validation-for="CreatedBy" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <input type="submit" value="Create" class="btn btn-primary" />
+    </div>
+</form>
+@if (Model != null)
+{
+    <div class="short-link-container">
+        <a href="@Model.FullURL" class="btn btn-primary">Перейти</a>
+        <p>@Model.ShortURL</p>
+    </div>
+}
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
