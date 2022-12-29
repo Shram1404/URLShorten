@@ -49,8 +49,8 @@
             <td>
                     @if (User.IsInRole("Admin") || User.FindFirst(ClaimTypes.NameIdentifier).Value == item.CreatedBy)
                     {
-                        <a asp-action="Edit" asp-route-id="@item.URLId">Edit</a><p> | </p>
-                        <a asp-action="Details" asp-route-id="@item.URLId">Details</a><p> | </p>
+                        <a asp-action="Edit" asp-route-id="@item.URLId">Edit |</a>
+                        <a asp-action="Details" asp-route-id="@item.URLId">Details |</a>
                         <a asp-action="Delete" asp-route-id="@item.URLId">Delete</a>
                     }
             </td>
