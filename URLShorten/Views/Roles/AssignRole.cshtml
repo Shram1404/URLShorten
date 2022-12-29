@@ -1,0 +1,20 @@
+﻿@model UserRoleManager
+
+<form method="post" action="/Roles/AssignRole">
+    <label for="userId">Select user:</label>
+    <select name="userId" id="userId">
+        @foreach (var user in Model.Users)
+        {
+            <option value="@user.Id">@user.UserName</option>
+        }
+    </select>
+    <label for="role">Select role:</label>
+    <select name="role" id="role">
+        @foreach (var role in Model.Roles)
+        {
+            <option value="@role.Name">@role.Name</option>
+        }
+    </select>
+
+    <input type="submit" value="Assign role" />
+</form>

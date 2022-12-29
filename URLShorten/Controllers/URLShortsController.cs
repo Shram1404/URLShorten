@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -19,12 +21,88 @@ namespace URLShorten.Controllers
             _context = context;
         }
 
-        // GET: URLShorts
-        public async Task<IActionResult> Index()
+        [AllowAnonymous]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Index(URLShort uRL)
         {
-              return _context.URLShort != null ? 
-                          View(await _context.URLShort.ToListAsync()) :
-                          Problem("Entity set 'URLShortenContext.URLShort'  is null.");
+
+            if (IsValidUrl(uRL.FullURL))
+            {
+                string tempShortURL = CreateShortURL();
+                while (_context.URLShort.Any(x => x.ShortURL == tempShortURL))
+                {
+                    tempShortURL = CreateShortURL();
+                }
+
+                uRL.ShortURL = tempShortURL;
+                if (ModelState.IsValid)
+                {
+                    if (uRL.CreatedDate.Equals(DateTime.MinValue))
+                        uRL.CreatedDate = DateTime.Now;
+                    _context.URLShort.Add(uRL);
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    return View(uRL);
+                }
+            }
+            else
+            {
+                ModelState.AddModelError("FullURL", "Incorrect URL");
+            }
+            return View();
+        }
+
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        public IActionResult ViewShortLink(string tempShortURL)
+        {
+            var shortLink = _context.URLShort.FirstOrDefault(s => s.ShortURL == tempShortURL);
+
+            if (shortLink == null)
+            {
+                return NotFound();
+            }
+            return Redirect(shortLink.FullURL);
+        }
+
+        private bool IsValidUrl(string url)
+        {
+            var regex = new Regex(@"^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$");
+            return regex.IsMatch(url);
+        }
+
+        private string CreateShortURL()
+        {
+            Random rnd = new Random();
+            int j;
+            string tempUrl = "";
+
+            for (int i = 0; i < 6; i++)
+            {
+                j = rnd.Next(0, 35);
+
+                if (j < 10)
+                    j += 48;
+                else
+                    j += 87;
+                tempUrl = tempUrl + char.ConvertFromUtf32(j);
+            }
+            string tempFullURL = Url.Action("", "", new { s = tempUrl }, Request.Scheme);
+            return tempFullURL;
+        }
+
+        // GET: URLs
+        public async Task<IActionResult> Table()
+        {
+            return _context.URLShort != null ?
+                        View(await _context.URLShort.ToListAsync()) :
+                        Problem("Entity set 'URLShorterContext.URL'  is null.");
         }
 
         // GET: URLShorts/Details/5

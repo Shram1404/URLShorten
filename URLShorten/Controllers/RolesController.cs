@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using URLShorten.Models;
 
 namespace MyApp.Controllers
 {
@@ -17,7 +20,13 @@ namespace MyApp.Controllers
 
         public IActionResult Index()
         {
-            return View(_roleManager.Roles);
+            return View();
+        }
+
+        public class YourModelClass
+        {
+            public List<IdentityRole> Roles { get; set; }
+            public List<IdentityUser> Users { get; set; }
         }
 
         public IActionResult Create()
@@ -109,10 +118,16 @@ namespace MyApp.Controllers
             }
             return View(role);
         }
-
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> AssignRole(string userId, string role)
         {
+
+            var model = new UserRoleManager();
+            model.Users = _userManager.Users.ToList();
+            model.Roles = _roleManager.Roles.ToList();
+          
+
             IdentityUser user = await _userManager.FindByIdAsync(userId);
             if (user != null)
             {
@@ -133,7 +148,7 @@ namespace MyApp.Controllers
             {
                 ModelState.AddModelError("", "User not found");
             }
-            return View("Index", _userManager.Users);
+              return View(model);
         }
     }
 }

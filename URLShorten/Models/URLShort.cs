@@ -18,6 +18,5 @@ namespace URLShorten.Models
 
         public string CreatedBy { get; set; }
 
-        public string? OwnerID { get; set; }
     }
 }

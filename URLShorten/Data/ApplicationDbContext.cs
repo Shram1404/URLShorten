@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using URLShorten.Models;
 
 namespace URLShorten.Data
 {
@@ -9,5 +10,6 @@ namespace URLShorten.Data
             : base(options)
         {
         }
+        public DbSet<URLShorten.Models.URLShort> URLShort { get; set; } = default!;
     }
 }
