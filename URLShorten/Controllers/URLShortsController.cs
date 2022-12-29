@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -21,7 +22,7 @@ namespace URLShorten.Controllers
             _context = context;
         }
 
-        [AllowAnonymous]
+        [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Index(URLShort uRL)
@@ -29,22 +30,35 @@ namespace URLShorten.Controllers
 
             if (IsValidUrl(uRL.FullURL))
             {
-                string tempShortURL = CreateShortURL();
-                while (_context.URLShort.Any(x => x.ShortURL == tempShortURL))
+                bool isDuplicate = await _context.URLShort.AnyAsync(x => x.FullURL == uRL.FullURL);
+                if (!isDuplicate)
                 {
-                    tempShortURL = CreateShortURL();
-                }
 
-                uRL.ShortURL = tempShortURL;
-                if (ModelState.IsValid)
-                {
-                    if (uRL.CreatedDate.Equals(DateTime.MinValue))
-                        uRL.CreatedDate = DateTime.Now;
-                    _context.URLShort.Add(uRL);
-                    await _context.SaveChangesAsync();
+                    string tempShortURL = CreateShortURL();
+                    while (_context.URLShort.Any(x => x.ShortURL == tempShortURL))
+                    {
+                        tempShortURL = CreateShortURL();
+                    }
+
+                    uRL.ShortURL = tempShortURL;
+                    uRL.CreatedBy = Convert.ToString(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+                    if (ModelState.IsValid)
+                    {
+                        if (uRL.CreatedDate.Equals(DateTime.MinValue))
+                            uRL.CreatedDate = DateTime.Now;
+
+                        _context.URLShort.Add(uRL);
+                        await _context.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        return View(uRL);
+                    }
                 }
                 else
                 {
+                    ModelState.AddModelError("FullURL", "This URL is already in the database");
                     return View(uRL);
                 }
             }
@@ -129,9 +143,7 @@ namespace URLShorten.Controllers
             return View();
         }
 
-        // POST: URLShorts/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: URLShorts/Create 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("URLId,CreatedDate,FullURL,ShortURL,CreatedBy")] URLShort uRLShort)

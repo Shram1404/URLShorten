@@ -31,7 +31,6 @@ namespace URLShorten.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("URLId"));
 
                     b.Property<string>("CreatedBy")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedDate")
@@ -42,7 +41,6 @@ namespace URLShorten.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ShortURL")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("URLId");

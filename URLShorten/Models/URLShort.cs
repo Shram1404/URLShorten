@@ -12,11 +12,12 @@ namespace URLShorten.Models
         [DataType(DataType.Date)]
         public DateTime CreatedDate { get; set; }
 
+        [Required]
         public string FullURL { get; set; }
 
-        public string ShortURL { get; set; }
+        public string? ShortURL { get; set; }
 
-        public string CreatedBy { get; set; }
+        public string? CreatedBy { get; set; }
 
     }
 }
